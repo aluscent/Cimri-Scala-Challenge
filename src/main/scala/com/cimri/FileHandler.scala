@@ -1,41 +1,32 @@
 package com.cimri
 
+import cats.effect.{IO, Resource}
+import cats.syntax.parallel._
 import com.cimri.model.{Feed, FeedsFile}
-
-import java.io.File
 import spray.json._
+
+import scala.io.Source
 
 object FileHandler {
 
-  def getCsvFile(path: String): List[Map[String, String]] = {
-    val file = scala.io.Source
-      .fromFile(new File(path))
+  def getCsvFile(path: String): IO[List[Map[String, String]]] = Resource
+    .make(IO(Source.fromFile(path)("UTF-8")))(src => IO(src.close()))
+    .use { file =>
+      val listFile = file
+        .getLines()
+        .toList
 
-    val listFile = file
-      .getLines()
-      .toList
+      val columns = listFile.head.split(",").toList
+      val rawFile = listFile.tail.map(_.split(",").toList)
 
-    val columns = listFile.head.split(",").toList
-    val rawFile = listFile.tail.map(_.split(",").toList)
+      rawFile.map(l => (columns zip l).toMap)
+      rawFile.parTraverse(line => IO((columns zip line).toMap))
+    }
 
-    file.close()
 
-    rawFile.map(l => (columns zip l).toMap)
-  }
+  import com.cimri.implicits.FeedImplicits._
 
-  def getJsonFile(path: String): List[Feed] = {
-    val file = scala.io.Source
-      .fromFile(path)("UTF-8")
-
-    val jsFile = file
-      .mkString
-      .parseJson
-
-    file.close()
-
-    import com.cimri.implicits.FeedImplicits._
-    jsFile
-      .convertTo[FeedsFile]
-      .feeds
-  }
+  def getJsonFile(path: String): IO[List[Feed]] = Resource
+    .make(IO(Source.fromFile(path)("UTF-8")))(src => IO(src.close()))
+    .use(file => IO(file.mkString.parseJson.convertTo[FeedsFile].feeds))
 }
