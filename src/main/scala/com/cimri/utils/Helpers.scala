@@ -1,10 +1,15 @@
-package com.cimri
+package com.cimri.utils
+
+import org.mongodb.scala._
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
-import org.mongodb.scala._
 
+/**
+ * Helper functions used for decoding and encoding the data
+ * for MongoDB, and also printing the data.
+ */
 object Helpers {
 
   implicit class DocumentObservable[C](val observable: Observable[Document]) extends ImplicitObservable[Document] {

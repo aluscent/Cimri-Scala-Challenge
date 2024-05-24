@@ -7,6 +7,11 @@ import org.http4s.blaze.server.BlazeServerBuilder
 import scala.concurrent.ExecutionContext.global
 import scala.language.postfixOps
 
+/**
+ * Creates a BlazeServer to listen to connections.
+ * @param port listening port
+ * @param api routes' endpoints
+ */
 class Server(port: Int, api: HttpRoutes[IO]) {
 
   private val server = BlazeServerBuilder[IO]
@@ -21,5 +26,11 @@ class Server(port: Int, api: HttpRoutes[IO]) {
 }
 
 object Server {
+
+  /**
+   * Creates a BlazeServer for connections.
+   * @param port listening port
+   * @param api routes' endpoints
+   */
   def apply(port: Int, api: HttpRoutes[IO]) = new Server(port, api)
 }

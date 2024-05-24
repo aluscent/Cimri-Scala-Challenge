@@ -1,4 +1,4 @@
-package com.cimri
+package com.cimri.db
 
 import cats.effect.{Async, IO, Resource}
 import org.mongodb.scala._
@@ -7,20 +7,34 @@ import org.mongodb.scala.model.Filters._
 import org.mongodb.scala.result.{InsertManyResult, InsertOneResult}
 
 import java.util.Date
-import scala.concurrent.Future
 import scala.language.higherKinds
 
 object MongoWrapper {
-  def apply(collectionName: String): Resource[IO, MongoWrapper] =
+
+  /**
+   * Creates a resource for managing MongoDB connection lifecycle.
+   * @param uri the MongoDB URI
+   * @param db the name of the database
+   * @param collectionName the name of the collection to be used
+   * @return a resource that provides a MongoWrapper instance
+   */
+  def apply(uri: String, db: String, collectionName: String): Resource[IO, MongoWrapper] =
     Resource.make(IO(new MongoWrapper {
+      override def mongoClient: MongoClient = MongoClient(uri)
+
+      override def cimriDB: MongoDatabase = mongoClient.getDatabase(db)
+
       override def collection: MongoCollection[Document] = cimriDB.getCollection(collectionName)
     }))(src => IO(src.closeConnection()))
 }
 
+/**
+ * Class defining the interface for MongoDB operations.
+ */
 abstract class MongoWrapper {
 
-  private def mongoClient = MongoClient("mongodb://localhost:27017/cimri")
-  def cimriDB: MongoDatabase = mongoClient.getDatabase("cimri")
+  def mongoClient: MongoClient
+  def cimriDB: MongoDatabase
   def collection: MongoCollection[Document]
 
   def closeConnection(): Unit = mongoClient.close()

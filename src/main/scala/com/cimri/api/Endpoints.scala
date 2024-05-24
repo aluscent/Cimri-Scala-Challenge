@@ -1,7 +1,7 @@
 package com.cimri.api
 
 import cats.effect.IO
-import com.cimri.MongoWrapper
+import com.cimri.db.MongoWrapper
 import io.circe.Encoder.AsObject.importedAsObjectEncoder
 import io.circe.generic.auto._
 import org.http4s.HttpRoutes
@@ -10,7 +10,15 @@ import org.http4s.dsl.io._
 
 import java.text.SimpleDateFormat
 
+/**
+ * API routes for interacting with MongoDB.
+ * */
 object Endpoints {
+
+  /**
+   * API routes for interacting with MongoDB.
+   * @param mongoWrapper the Mongo wrapper instance
+   */
   def endpoints(mongoWrapper: MongoWrapper): HttpRoutes[IO] = HttpRoutes.of[IO] {
     case GET -> Root / "api" / "getById" / id =>
       mongoWrapper.queryById(id).flatMap {
