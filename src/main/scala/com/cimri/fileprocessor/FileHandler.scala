@@ -4,6 +4,7 @@ import cats.effect.{IO, Resource}
 import cats.syntax.parallel._
 import com.cimri.model.{Feed, FeedsFile}
 import spray.json._
+import com.github.tototoshi.csv._
 
 import scala.io.Source
 
@@ -19,14 +20,12 @@ object FileHandler {
    * @return a list of Mapped feed that maps each data entry to its corresponding column name
    */
   def getCsvFile(path: String): IO[List[Map[String, String]]] = Resource
-    .make(IO(Source.fromFile(path)("UTF-8")))(src => IO(src.close()))
+    .make(IO(CSVReader.open(Source.fromFile(path)("UTF-8"))))(src => IO(src.close()))
     .use { file =>
-      val listFile = file
-        .getLines()
-        .toList
+      val listFile = file.all()
 
-      val columns = listFile.head.split(",").toList
-      val rawFile = listFile.tail.map(_.split(",").toList)
+      val columns = listFile.head
+      val rawFile = listFile.tail
 
       rawFile.map(l => (columns zip l).toMap)
       rawFile.parTraverse(line => IO((columns zip line).toMap))

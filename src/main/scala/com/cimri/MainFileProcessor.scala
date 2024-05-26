@@ -22,7 +22,7 @@ object MainFileProcessor extends IOApp {
    * @param listOfFeed list of the entries related to the feed files
    * @return A map of date to a list of all respecting feed file entries
    */
-  def splitFeedsDayByDay(listOfFeed: List[Feed]): Map[String, List[Feed]] = listOfFeed
+  def splitFeedDayByDay(listOfFeed: List[Feed]): Map[String, List[Feed]] = listOfFeed
     .groupBy(feed => new SimpleDateFormat("yyyy-MM-dd").format(feed.version))
 
 

@@ -5,7 +5,6 @@ import spray.json.{DefaultJsonProtocol, JsString, JsValue, RootJsonFormat, deser
 
 import java.text.SimpleDateFormat
 import java.util.Date
-import scala.util.Try
 
 object FeedImplicits extends DefaultJsonProtocol {
   implicit object DateFormat extends RootJsonFormat[Date] {
@@ -19,7 +18,7 @@ object FeedImplicits extends DefaultJsonProtocol {
     private def dateToIsoString(date: Date): String = date.toString
 
     private def parseIsoDateString(date: String): Date =
-        new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").parse(date)
+      new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSX").parse(date)
   }
 
 
